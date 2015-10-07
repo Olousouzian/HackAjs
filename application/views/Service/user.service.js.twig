@@ -1,0 +1,128 @@
+
+angular.module('ClubSeitaApp')
+    .service('userService', ['$q', '$http', '$location', 'ws', function ($q, $http, $location, ws) {
+        var myself;
+        var myPoints;
+
+        return {
+            getUser: function () {
+                return ws.get('loyalty_seita_apiuser_getuserinfos');
+            },
+            getMyself: function (force) {
+                var deffered = $q.defer();
+
+                if(typeof myself == "undefined" || typeof force != "undefined") {
+                    ws.get('loyalty_seita_apiuser_getuserinfos_1')
+                        .then(function(data) {
+                            myself = data;
+                            deffered.resolve(myself);
+                        }, function(status) {
+                            deffered.reject(status);
+                        })
+                } else {
+                    deffered.resolve(myself);
+                }
+
+                return deffered.promise;
+            },
+            getPointsMyself: function(renewCache) {
+                if(typeof renewCache == "undefined") {
+                    renewCache = false;
+                }
+
+                var deffered = $q.defer();
+
+                if(typeof myPoints == "undefined" || renewCache) {
+                    ws.get('loyalty_seita_apiuser_getpointhistory_1')
+                        .then(function(data) {
+                            myPoints = data;
+                            deffered.resolve(myPoints);
+                        }, function(status) {
+                            deffered.reject(status);
+                        })
+                } else {
+                    deffered.resolve(myPoints);
+                }
+
+                return deffered.promise;
+            },
+            getUserComments: function(userId){
+                return ws.get('loyalty_seita_apinews_getusercomments', {
+                    userId: userId
+                });
+            },
+            getUserCommentsMyself: function(){
+                return ws.get('loyalty_seita_apinews_getusercomments_1');
+            },
+            getUserLikes: function(userId) {
+                return ws.get('loyalty_seita_apinews_getuserlikes', {
+                    userId: userId
+                });
+            },
+            getUserLikesMyself: function() {
+                return ws.get('loyalty_seita_apinews_getuserlikes_1');
+            },
+            getPictureUserMyself: function(){
+                return $location.protocol() + "://" + $location.host() + "/api/users/image/myself?version=" + Math.random();
+            },
+            getPictureTabacMyself: function(){
+                return $location.protocol() + "://" + $location.host() + "/api/users/imageTabac/myself?version=" + Math.random();
+            },
+            getPictureUser: function(userId){
+                return $location.protocol() + "://" + $location.host() + "/api/users/image/" + userId;
+            },
+            getListServices: function(){
+                return ws.get('loyalty_seita_apiuser_getservicesuses');
+            },
+            userService: function(serviceId){
+                 return ws.get('loyalty_seita_apiuser_useservice', {
+                    serviceId: serviceId
+                });
+            },
+            updateUserPersonalInfos: function(infos) {
+                var deffered = $q.defer();
+
+                ws.put('loyalty_seita_apiuser_putpersonalinfos_1', {}, infos)
+                    .then(function(data) {
+                        myself = data;
+                        deffered.resolve(myself);
+                    }, function(status) {
+                        deffered.reject(data);
+                    })
+
+                return deffered.promise;
+            },
+            updateSalePointInfos: function(infos) {
+                var deffered = $q.defer();
+
+                ws.put('loyalty_seita_apiuser_putsalepoint_1', {}, infos)
+                    .then(function(data) {
+                        myself = data;
+                        deffered.resolve(myself);
+                    }, function(status) {
+                        deffered.reject(data);
+                    })
+
+                return deffered.promise;
+            },
+
+            checkPassword: function(infos) {
+                var deffered = $q.defer();
+
+                ws.put('loyalty_seita_apiuser_checkpassword', {}, infos)
+                    .then(function(data) {
+                        deffered.resolve(data);
+                    }, function(status) {
+                        deffered.reject(data);
+                    })
+
+                return deffered.promise;
+            },
+            contactSendMail: function(subject, destinataireId, body){
+                return ws.post('loyalty_seita_apicontact_postcontact', {}, { destinataireId: destinataireId, subject : subject, body : body});
+            },
+            traceRanking: function(sectionName) {
+                return ws.put('loyalty_seita_apiuser_clickranking', {}, { sectionName: sectionName });
+            }
+        }
+    }]);

@@ -1,0 +1,142 @@
+angular.module('ClubSeitaApp')
+    .service('ws', ['$q', '$http', '$rootScope', function ($q, $http, $rootScope) {
+        return {
+            get: function (routeName, routeParams, disableProgressBar) {
+                var deffered = $q.defer();
+
+                if (typeof disableProgress == "undefined") {
+                    disableProgressBar = false;
+                }
+
+                disableProgressBar = false;
+                if (!disableProgressBar) {
+                    $rootScope.progress = 'progress';
+                }
+                $http.get(Routing.generate(routeName, routeParams))
+                    .success(function (data, status) {
+                        if (status == 200) {
+                            if (!disableProgressBar) {
+                                $rootScope.progress = 'no';
+                            }
+                            deffered.resolve(data);
+                        } else {
+                            $rootScope.progress = 'error';
+                            $rootScope.messages = data;
+                            deffered.reject(data);
+                        }
+                    })
+                    .error(function (data, status) {
+                        if (status == 401) {
+                            window.location = Routing.generate("fos_user_security_login");
+                        }
+                        $rootScope.progress = 'error';
+                        $rootScope.messages = data;
+                        deffered.reject(data);
+                    })
+
+                return deffered.promise;
+            },
+            put: function (routeName, routeParams, data, disableProgressBar) {
+                var deffered = $q.defer();
+                if (typeof disableProgress == "undefined") {
+                    disableProgressBar = false;
+                }
+                if (!disableProgressBar) {
+                    $rootScope.progress = 'progress';
+                }
+                $http.put(Routing.generate(routeName, routeParams), data)
+                    .success(function (data, status) {
+                        if (status == 200) {
+                            if (!disableProgressBar) {
+                                $rootScope.progress = 'no';
+                            }
+                            deffered.resolve(data);
+                        } else {
+                            $rootScope.progress = 'error';
+                            $rootScope.messages = data;
+                            deffered.reject(data);
+                        }
+                    })
+                    .error(function (data, status) {
+                        console.log("error");
+                        console.log(data);
+                        if (status == 401) {
+                            window.location = Routing.generate("fos_user_security_login");
+                        }
+                        deffered.reject(data);
+                    })
+                return deffered.promise;
+
+            },
+            post: function (routeName, routeParams, data, disableProgressBar, config) {
+
+                var deffered = $q.defer();
+
+                if (typeof disableProgress == "undefined") {
+                    disableProgressBar = false;
+                }
+
+                if (typeof config == "undefined") {
+                    config = {};
+                }
+
+                $http.post(Routing.generate(routeName, routeParams), data, config)
+                    .success(function (data, status) {
+                    if (status == 200) {
+                        $rootScope.progress = 'no';
+                        deffered.resolve(data);
+                    } else {
+                        $rootScope.progress = 'error';
+                        $rootScope.messages = data;
+                        deffered.reject(data);
+                    }
+                })
+                .error(function (data, status) {
+                    if (status == 401) {
+                        window.location = Routing.generate("fos_user_security_login");
+                    }
+                    $rootScope.progress = 'error';
+                    $rootScope.messages = data;
+                    deffered.reject(data);
+                })
+
+                return deffered.promise;
+
+            },
+            delete: function (routeName, routeParams, data, disableProgressBar) {
+
+                var deffered = $q.defer();
+
+
+                if (typeof disableProgress == "undefined") {
+                    disableProgressBar = false;
+                }
+                
+                    if (!disableProgressBar) {
+                        $rootScope.progress = 'progress';
+                    }
+                    $http.delete(Routing.generate(routeName, routeParams), data)
+                        .success(function (data, status) {
+                            if (status == 200) {
+                                if (!disableProgressBar) {
+                                    $rootScope.progress = 'no';
+                                }
+                                deffered.resolve(data);
+                            } else {
+                                $rootScope.progress = 'error';
+                                $rootScope.messages = data;
+                                deffered.reject(data);
+                            }
+                        })
+                        .error(function (data, status) {
+                            if (status == 401) {
+                                window.location = Routing.generate("fos_user_security_login");
+                            }
+                            $rootScope.progress = 'error';
+                            $rootScope.messages = data;
+                            deffered.reject(data);
+                        })
+                return deffered.promise;
+            }
+        }
+    }]);
